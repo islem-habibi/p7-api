@@ -1,6 +1,4 @@
 import shap
-import mlflow
-import mlflow.sklearn
 from flask import Flask, jsonify, request
 import numpy as np
 import pandas as pd
@@ -9,9 +7,10 @@ matplotlib.use('Agg')  # 'Agg' est un backend non interactif
 import matplotlib.pyplot as plt
 import io
 import base64
+from joblib import load
 
-# Charger le modèle depuis MLflow
-model = mlflow.sklearn.load_model('runs:/7faa0e8554a24261a5cce0b499c4026c/model')
+# Charger le modèle joblib
+model = load('model.joblib')
 
 
 # Créer une application Flask
