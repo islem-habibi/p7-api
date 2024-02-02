@@ -1,5 +1,5 @@
 import shap
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -7,14 +7,19 @@ matplotlib.use('Agg')  # 'Agg' est un backend non interactif
 import matplotlib.pyplot as plt
 import io
 import base64
-from joblib import load
+import pickle
+#from joblib import load
 
 # Charger le modèle joblib
-model = load('model.joblib')
+model = pickle.load(open('model.pkl', 'rb'))
 
 
 # Créer une application Flask
 app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return render_template('index.html')
 
 # Définir une route pour effectuer des prédictions
 @app.route('/predict_proba', methods=['POST'])
