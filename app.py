@@ -50,10 +50,11 @@ def predict_proba():
 
         # Renvoyer les prédictions au format JSON
         #return jsonify(f"le df est{df}")
-        return jsonify({'prediction': prediction.round(2).tolist(), 'shap_plot': 'data:image/png;base64,' + plot_data})
+        return render_template('index.html')
+        #return jsonify({'prediction': prediction.round(2).tolist(), 'shap_plot': 'data:image/png;base64,' + plot_data})
     except Exception as e:
         return jsonify({'error': str(e), 'df': df})
 
-# Exécuter l'application Flask sur le port 8000
+# Exécuter l'application Flask sur le port 7000
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=7000, debug=True)
