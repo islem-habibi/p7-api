@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Prédiction de probabilté de faillite client <title>
+    <title>Prédiction de Modèle</title>
     <script src="https://d3js.org/d3.v6.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/1.0.11/jquery.csv.min.js"></script>
@@ -22,47 +22,49 @@
     <div id="shap-plot"></div>
 
     <script>
-        function predict() {
-            var clientId = $('#clientId').val();
-            var file = $('#csvFile').prop('files')[0];
+         $(document).ready(function() {
+            function predict() {
+                var clientId = $('#clientId').val();
+                var file = $('#csvFile').prop('files')[0];
 
-            if (!file || !clientId) {
-                alert('Veuillez sélectionner un fichier CSV et entrer un ID client.');
-                return;
-            }
-
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var csvData = e.target.result;
-                var data = $.csv.toArrays(csvData);
-                var keys = data[0];
-                var clientData = data.find(row => row.includes(clientId));
-                if (!clientData) {
-                    alert('ID client non trouvé dans le fichier CSV.');
+                if (!file || !clientId) {
+                    alert('Veuillez sélectionner un fichier CSV et entrer un ID client.');
                     return;
                 }
-                var jsonData = {
-                    keys: keys,
-                    data: clientData
-                };
 
-                $.ajax({
-                    url: '/predict_proba',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(jsonData),
-                    success: function(response) {
-                        $('#prediction-result').html('Prédiction: ' + response.prediction + '%');
-                        $('#shap-plot').html('<img src="' + response.shap_plot + '" alt="SHAP Plot">');
-                    },
-                    error: function(error) {
-                        console.error(error);
-                        alert('Une erreur est survenue lors de la prédiction.');
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var csvData = e.target.result;
+                    var data = $.csv.toArrays(csvData);
+                    var keys = data[0];
+                    var clientData = data.find(row => row.includes(clientId));
+                    if (!clientData) {
+                        alert('ID client non trouvé dans le fichier CSV.');
+                        return;
                     }
-                });
-            };
-            reader.readAsText(file);
-        }
+                    var jsonData = {
+                        keys: keys,
+                        data: clientData
+                    };
+
+                    $.ajax({
+                        url: '/predict_proba',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(jsonData),
+                        success: function(response) {
+                            $('#prediction-result').html('Prédiction: ' + response.prediction + '%');
+                            $('#shap-plot').html('<img src="' + response.shap_plot + '" alt="SHAP Plot">');
+                        },
+                        error: function(error) {
+                            console.error(error);
+                            alert('Une erreur est survenue lors de la prédiction.');
+                        }
+                    });
+                };
+                reader.readAsText(file);
+            }
+        })
     </script>
 </body>
 </html>
