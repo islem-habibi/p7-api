@@ -17,9 +17,13 @@ model = pickle.load(open('model.pkl', 'rb'))
 # Créer une application Flask
 app = Flask(__name__)
 
+@app.route('/', methods=['GET'])
+def home():
+    # Afficher un bouton qui mène à la route '/predict_proba'
+    return render_template('home.html')
 
 # Définir une route pour effectuer des prédictions
-@app.route('/predict_proba', methods=['GET', 'POST'])
+@app.route('/predict_proba', methods=['POST'])
 def predict_proba():
     if request.method == 'POST':
         try:
