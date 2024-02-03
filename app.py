@@ -19,8 +19,8 @@ app = Flask(__name__)
 
 
 # Définir une route pour effectuer des prédictions
-@app.route('/', methods=['GET', 'POST'])
-def index():
+@app.route('/predict_proba', methods=['GET', 'POST'])
+def predict_proba():
     if request.method == 'POST':
         try:
             # Obtenir les données JSON de la requête
