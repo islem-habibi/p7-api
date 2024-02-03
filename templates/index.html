@@ -22,14 +22,13 @@
     <div id="shap-plot"></div>
 
     <script>
-        function predict(event) {
-            event.preventDefault(); // Empêcher le formulaire de se soumettre
-
+         
+        function predict() {
             var clientId = $('#clientId').val();
             var file = $('#csvFile').prop('files')[0];
 
             if (!file || !clientId) {
-                alert('Veuillez sélectionner un fichier CSV (fichier sample_test.csv) et entrer un ID client.');
+                alert('Veuillez sélectionner un fichier CSV et entrer un ID client.');
                 return;
             }
 
@@ -54,9 +53,8 @@
                     contentType: 'application/json',
                     data: JSON.stringify(jsonData),
                     success: function(response) {
-                        var predictionText = Array.isArray(response.prediction) ? response.prediction[0] : response.prediction;
-                        $('#prediction-result').html('Prédiction: ' + predictionText + '%');
-                        $('#shap-plot').html('<img src="' + response.shap_plot + '" alt="SHAP Plot Image">');
+                        $('#prediction-result').html('Prédiction: ' + response.prediction + '%');
+                        $('#shap-plot').html('<img src="' + response.shap_plot + '" alt="SHAP Plot">');
                     },
                     error: function(error) {
                         console.error(error);
@@ -66,6 +64,7 @@
             };
             reader.readAsText(file);
         }
+    
     </script>
 </body>
 </html>
