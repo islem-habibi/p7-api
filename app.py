@@ -17,12 +17,9 @@ model = pickle.load(open('model.pkl', 'rb'))
 # Créer une application Flask
 app = Flask(__name__)
 
-@app.route('/')
-def home():
-    return render_template('index.html')
 
 # Définir une route pour effectuer des prédictions
-@app.route('/predict_proba', methods=['POST'])
+@app.route('/', methods=['POST'])
 def predict_proba():
     try:
         # Obtenir les données JSON de la requête
