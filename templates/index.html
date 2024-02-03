@@ -16,19 +16,25 @@
         <label for="clientId">Entrer l'ID du client (SK_ID_CURR): exemple 208550 ou 144092</label>
         <input type="text" id="clientId" name="clientId">
         <br><br>
-        <button type="button" onclick="predict()">Prédire</button>
+        <button type="submit">Prédire</button>
     </form>
     <div id="prediction-result"></div>
     <div id="shap-plot"></div>
 
     <script>
-         
+        $(document).ready(function() {
+            $('#prediction-form').on('submit', function(event) {
+                event.preventDefault();
+                predict();
+            });
+        });
+
         function predict() {
             var clientId = $('#clientId').val();
             var file = $('#csvFile').prop('files')[0];
 
             if (!file || !clientId) {
-                alert('Veuillez sélectionner un fichier CSV et entrer un ID client.');
+                alert('Veuillez sélectionner un fichier CSV (fichier sample_test.csv) et entrer un ID client.');
                 return;
             }
 
@@ -47,24 +53,28 @@
                     data: clientData
                 };
 
-                $.ajax({
-                    url: '/predict_proba',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(jsonData),
-                    success: function(response) {
-                        $('#prediction-result').html('Prédiction: ' + response.prediction + '%');
-                        $('#shap-plot').html('<img src="' + response.shap_plot + '" alt="SHAP Plot">');
-                    },
-                    error: function(error) {
-                        console.error(error);
-                        alert('Une erreur est survenue lors de la prédiction.');
-                    }
-                });
+                try {
+                    $.ajax({
+                        url: '/predict_proba',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(jsonData),
+                        success: function(response) {
+                            $('#prediction-result').html('Prédiction: ' + response.prediction + '%');
+                            $('#shap-plot').html('<img src="' + response.shap_plot + '" alt="SHAP Plot">');
+                        },
+                        error: function(error) {
+                            console.error(error);
+                            alert('Une erreur est survenue lors de la prédiction.');
+                        }
+                    });
+                } catch (error) {
+                    console.error(error);
+                    alert('Une erreur est survenue lors de la prédiction.');
+                }
             };
             reader.readAsText(file);
         }
-    
     </script>
 </body>
 </html>
