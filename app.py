@@ -1,46 +1,36 @@
 import shap
 from flask import Flask, jsonify, request, render_template
-import numpy as np
 import pandas as pd
 import matplotlib
-matplotlib.use('Agg')  # 'Agg' est un backend non interactif
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import io
 import base64
 import pickle
-#from joblib import load
 
-# Charger le modèle joblib
+# Charger le modèle pickle
 model = pickle.load(open('model.pkl', 'rb'))
 
-
-# Créer une application Flask
 app = Flask(__name__)
 
-@app.route('/', methods=['POST'])
+@app.route('/', methods=['GET'])
 def home():
-    # Afficher un bouton qui mène à la route '/predict_proba'
     return render_template('home.html')
 
-# Définir une route pour effectuer des prédictions
 @app.route('/predict_proba', methods=['POST'])
 def predict_proba():
     if request.method == 'POST':
         try:
-            # Obtenir les données JSON de la requête
             data_df = request.get_json(force=True)
             df = pd.DataFrame([data_df["data"]], columns=data_df["keys"])
-            feature_names = data_df["keys"]
-            # Effectuer la prédiction
             prediction = model.predict_proba(df)[:, 1]
-            prediction = (prediction*100).round(2)
+            prediction = (prediction * 100).round(2)
 
-            explainer = shap.Explainer(model)
+            explainer = shap.TreeExplainer(model)
             shap_values = explainer.shap_values(df)
 
-            # Créer un plot SHAP et le convertir en image PNG encodée en base64
             plt.figure()
-            shap.force_plot(explainer.expected_value, shap_values[0], feature_names=feature_names, matplotlib=True)
+            shap.force_plot(explainer.expected_value, shap_values[0], df, matplotlib=True)
             plt.tight_layout()
             img = io.BytesIO()
             plt.savefig(img, format='png')
@@ -48,14 +38,13 @@ def predict_proba():
             img.seek(0)
             plot_data = base64.b64encode(img.getvalue()).decode()
 
-            # Renvoyer les prédictions au format JSON
             return jsonify({'prediction': prediction.tolist(), 'shap_plot': 'data:image/png;base64,' + plot_data})
         except Exception as e:
             return jsonify({'error': str(e)})
-    else:
-        # Servir la page HTML pour les requêtes GET
-        return render_template('index.html')
 
-# Exécuter l'application Flask sur le port 7000
+@app.route('/predict_proba', methods=['GET'])
+def predict_proba_get():
+    return render_template('index.html')
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=7000, debug=True)

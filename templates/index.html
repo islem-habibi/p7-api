@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <title>Prédiction de Modèle</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Ajout de la bibliothèque jQuery CSV pour la conversion des données CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/1.0.11/jquery.csv.min.js"></script>
 </head>
 <body>
@@ -36,8 +35,7 @@
                 var csvData = e.target.result;
                 var data = $.csv.toArrays(csvData);
                 var keys = data[0];
-                // Assurez-vous que l'ID du client (SK_ID_CURR) est dans la dernière colonne
-                var clientData = data.find(row => row[row.length - 1] === clientId);
+                var clientData = data.find(row => row.includes(clientId));
                 if (!clientData) {
                     alert('ID client non trouvé dans le fichier CSV.');
                     return;
