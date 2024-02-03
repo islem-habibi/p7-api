@@ -13,6 +13,9 @@ model = pickle.load(open('model.pkl', 'rb'))
 
 app = Flask(__name__)
 
+def roundVal(n):
+    return (n * 100).round(2)
+
 @app.route('/', methods=['GET'])
 def home():
     return render_template('home.html')
@@ -22,9 +25,22 @@ def predict_proba():
     if request.method == 'POST':
         try:
             data_df = request.get_json(force=True)
-            df = pd.DataFrame([data_df["data"]], columns=data_df["keys"])
+            #print(f"shape data df data: {data_df["data"].shape]})
+            
+                       
+            data = list(map(float, data_df["data"]))
+            data[-1]=int(data[-1])
+            print(f"data est: \n: {data}")
+
+            df = pd.DataFrame([data], columns=data_df["keys"])
+            df= df.drop('SK_ID_CURR', axis=1)
+            print(f'df est:\n {df}')
+
             prediction = model.predict_proba(df)[:, 1]
-            prediction = (prediction * 100).round(2)
+            print(prediction)
+            prediction = list(map(roundVal, prediction))
+            print(prediction)                          
+
 
             explainer = shap.TreeExplainer(model)
             shap_values = explainer.shap_values(df)
@@ -38,7 +54,7 @@ def predict_proba():
             img.seek(0)
             plot_data = base64.b64encode(img.getvalue()).decode()
 
-            return jsonify({'prediction': prediction.tolist(), 'shap_plot': 'data:image/png;base64,' + plot_data})
+            return jsonify({'prediction': prediction, 'shap_plot': 'data:image/png;base64,' + plot_data})
         except Exception as e:
             return jsonify({'error': str(e)})
 
@@ -47,4 +63,4 @@ def predict_proba_get():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=7000, debug=True)
+    app.run(host='0.0.0.0', port=9000, debug=True)
