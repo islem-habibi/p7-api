@@ -25,36 +25,36 @@ def predict_proba():
     if request.method == 'POST':
         try:
             data_df = request.get_json(force=True)
-            #print(f"shape data df data: {data_df["data"].shape]})
             
                        
             data = list(map(float, data_df["data"]))
             data[-1]=int(data[-1])
-            print(f"data est: \n: {data}")
+            
 
-            df = pd.DataFrame([data], columns=data_df["keys"])
-            df= df.drop('SK_ID_CURR', axis=1)
-            print(f'df est:\n {df}')
+            df = pd.DataFrame([data], columns=data_df["keys"]) 
+
+
+            if 'SK_ID_CURR' in df.columns:
+                df=df.drop('SK_ID_CURR', axis=1)
 
             prediction = model.predict_proba(df)[:, 1]
             print(prediction)
             prediction = list(map(roundVal, prediction))
-            print(prediction)                          
+            print(prediction)
 
+            shap_plot_data = None
+            if any(pred > 50 for pred in prediction):
+                explainer = shap.TreeExplainer(model)
+                shap_values = explainer.shap_values(df)
+                shap.force_plot(explainer.expected_value, shap_values, df, show=False, matplotlib=True)
+                plt.tight_layout()
+                img = io.BytesIO()
+                plt.savefig(img, format='png')
+                plt.close()
+                img.seek(0)
+                shap_plot_data = base64.b64encode(img.getvalue()).decode()
 
-            explainer = shap.TreeExplainer(model)
-            shap_values = explainer.shap_values(df)
-
-            plt.figure()
-            shap.force_plot(explainer.expected_value, shap_values[0], df, matplotlib=True)
-            plt.tight_layout()
-            img = io.BytesIO()
-            plt.savefig(img, format='png')
-            plt.close()
-            img.seek(0)
-            plot_data = base64.b64encode(img.getvalue()).decode()
-
-            return jsonify({'prediction': prediction, 'shap_plot': 'data:image/png;base64,' + plot_data})
+            return jsonify({'prediction': prediction, 'shap_plot': 'data:image/png;base64,' + shap_plot_data if shap_plot_data else None})
         except Exception as e:
             return jsonify({'error': str(e)})
 
